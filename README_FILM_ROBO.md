@@ -7,6 +7,7 @@ Film Robo ist eine moderne Webanwendung, die natürlichsprachige Benutzer-Prompt
 ## 🎯 Technologie-Stack
 
 ### Backend
+
 - **Framework:** FastAPI (Python)
 - **KI-Integration:** Emergent LLM (GPT-4o-mini) für intelligente Prompt-Analyse
 - **Film-Daten:** TMDb API (The Movie Database)
@@ -14,6 +15,7 @@ Film Robo ist eine moderne Webanwendung, die natürlichsprachige Benutzer-Prompt
 - **Server:** Uvicorn (ASGI)
 
 ### Frontend
+
 - **Framework:** React 19
 - **UI-Komponenten:** Shadcn/UI mit Radix UI
 - **Styling:** Tailwind CSS
@@ -24,11 +26,13 @@ Film Robo ist eine moderne Webanwendung, die natürlichsprachige Benutzer-Prompt
 ## ✨ Hauptfunktionen
 
 ### 1. KI-basierte Prompt-Analyse
+
 - Versteht natürlichsprachige deutsche Anfragen
 - Intelligente Genre-Zuordnung
 - Fallback auf Keyword-Analyse bei KI-Ausfall
 
 ### 2. Genre-Katalog
+
 | Kategorie | TMDb Genre-IDs | Keywords |
 |-----------|----------------|----------|
 | Komödie | 35, 10749 | lustig, lachen, romantisch |
@@ -38,6 +42,7 @@ Film Robo ist eine moderne Webanwendung, die natürlichsprachige Benutzer-Prompt
 | Sci-Fi/Fantasy | 878, 14 | weltraum, zauber, fantasie |
 
 ### 3. Filmempfehlungen
+
 - Top 10 Filme basierend auf Genre-Zuordnung
 - Anzeige von Poster, Titel, Jahr, Bewertung
 - **✨ NEU: Streaming-Verfügbarkeit** (Netflix, Amazon Prime, Disney+, Sky, etc.)
@@ -46,6 +51,7 @@ Film Robo ist eine moderne Webanwendung, die natürlichsprachige Benutzer-Prompt
 ## 🚀 Installation & Setup
 
 ### Voraussetzungen
+
 - Python 3.11+
 - Node.js 16+
 - MongoDB (läuft bereits)
@@ -53,41 +59,54 @@ Film Robo ist eine moderne Webanwendung, die natürlichsprachige Benutzer-Prompt
 ### Backend-Setup
 
 1. **Abhängigkeiten sind bereits installiert:**
-   - emergentintegrations (für LLM)
-   - httpx (für TMDb API-Calls)
-   - FastAPI, uvicorn, motor, etc.
 
-2. **Umgebungsvariablen** (`/app/backend/.env`):
-   ```env
-   MONGO_URL="mongodb://localhost:27017"
-   DB_NAME="test_database"
-   CORS_ORIGINS="*"
-   EMERGENT_LLM_KEY=sk-emergent-07aE1D978827b72668
-   TMDB_API_KEY=PLACEHOLDER
-   ```
+- emergentintegrations (für LLM)
+- httpx (für TMDb API-Calls)
+- FastAPI, uvicorn, motor, etc.
+
+2. **Umgebungsvariablen** (`/app/backend/.env` – nur lokal, nicht commiten):
+
+  ```env
+  MONGO_URL="mongodb://localhost:27017"
+  DB_NAME="test_database"
+  CORS_ORIGINS="*"
+  EMERGENT_LLM_KEY=
+  TMDB_API_KEY=<DEIN_TMDB_API_KEY_V3>
+  TMDB_READ_ACCESS_TOKEN=<OPTIONAL_V4_READ_ACCESS_TOKEN>
+  ```
 
 3. **Backend starten:**
-   ```bash
-   cd /app/backend
-   sudo supervisorctl restart backend
-   ```
+
+  ```bash
+  cd /app/backend
+  sudo supervisorctl restart backend
+  ```
 
 ### Frontend-Setup
 
 1. **Abhängigkeiten sind bereits installiert** (package.json)
 
-2. **Frontend starten** (läuft bereits automatisch):
-   ```bash
-   cd /app/frontend
-   yarn start
-   ```
+2. **Frontend-Umgebungsvariablen** (`/app/frontend/.env` – nur lokal, nicht commiten):
+
+  ```env
+  REACT_APP_BACKEND_URL=http://localhost:8001
+  ```
+
+3. **Frontend starten** (läuft bereits automatisch):
+
+  ```bash
+  cd /app/frontend
+  yarn start
+  ```
 
 ## 📡 API-Endpunkte
 
 ### POST /api/recommend
+
 Analysiert den Prompt und gibt Filmempfehlungen zurück **inkl. Streaming-Verfügbarkeit**.
 
 **Request:**
+
 ```json
 {
   "prompt": "lustige Filme mit Aliens"
@@ -95,6 +114,7 @@ Analysiert den Prompt und gibt Filmempfehlungen zurück **inkl. Streaming-Verfü
 ```
 
 **Response:**
+
 ```json
 {
   "message": "✓ 10 Filme gefunden für Ihre Anfrage!",
@@ -124,9 +144,11 @@ Analysiert den Prompt und gibt Filmempfehlungen zurück **inkl. Streaming-Verfü
 ```
 
 ### GET /api/
+
 Health-Check Endpunkt.
 
 **Response:**
+
 ```json
 {
   "message": "Film Robo Backend läuft!",
@@ -163,25 +185,30 @@ Health-Check Endpunkt.
 
 Um echte Filmdaten zu erhalten:
 
-1. **TMDb Account erstellen:** https://www.themoviedb.org/signup
-2. **API-Key generieren:** https://www.themoviedb.org/settings/api
+1. **TMDb Account erstellen:** <https://www.themoviedb.org/signup>
+2. **API-Key generieren:** <https://www.themoviedb.org/settings/api>
 3. **Key in .env hinzufügen:**
+
    ```env
    TMDB_API_KEY=ihr_api_key_hier
    ```
+
 4. **Backend neu starten:**
+
    ```bash
    sudo supervisorctl restart backend
    ```
 
 ### Aktueller Status
+
 - ⚠️ Derzeit werden **Mock-Daten** verwendet (TMDB_API_KEY=PLACEHOLDER)
 - ✅ Die Struktur ist vollständig vorbereitet
 - ✅ Nach Hinzufügen des Keys werden automatisch echte Daten geladen
 
 ## 🧪 Testing
 
-### Manuelle Tests durchgeführt:
+### Manuelle Tests durchgeführt
+
 ✅ KI-Prompt-Analyse (6 verschiedene Prompts getestet)
 ✅ Frontend-UI (Screenshot-Tests)
 ✅ API-Endpunkte (curl Tests)
@@ -191,7 +218,8 @@ Um echte Filmdaten zu erhalten:
 ✅ Responsive Design
 ✅ **Streaming-Verfügbarkeit-Anzeige** (21+ Badges erfolgreich angezeigt)
 
-### Test-Ergebnisse:
+### Test-Ergebnisse
+
 ```
 ✓ "lustige Filme" → Genre [35] ✓
 ✓ "gruselige Horror" → Genre [27] ✓
@@ -224,18 +252,21 @@ Um echte Filmdaten zu erhalten:
 ## 🎯 Kernfunktionen - Technische Details
 
 ### 1. KI-Prompt-Analyse (`analyze_prompt_with_ai`)
+
 - Verwendet GPT-4o-mini für Textverständnis
 - System-Message mit Genre-Katalog
 - Strukturierte Antwort (nur Genre-IDs)
 - Fallback auf Keyword-Matching bei Fehler
 
 ### 2. TMDb API-Integration (`fetch_movies_from_tmdb`)
+
 - Asynchrone HTTP-Requests mit httpx
 - Parameter: Genre-IDs, Sortierung, Sprache (DE)
 - Top 10 populäre Filme
 - Vollständige Metadaten (Poster, Bewertung, etc.)
 
 ### 3. **✨ Streaming-Verfügbarkeit** (`fetch_streaming_providers`)
+
 - **⚡ OPTIMIERT:** Parallele API-Aufrufe mit `asyncio.gather()`
 - Abruf der Verfügbarkeit für Deutschland (DE)
 - Zeigt Flatrate-Anbieter (Abo-Streaming)
@@ -244,6 +275,7 @@ Um echte Filmdaten zu erhalten:
 - **Performance:** Von 6s auf 2.3s reduziert (61% schneller!)
 
 ### 4. React Frontend
+
 - State Management mit useState
 - Axios für API-Calls
 - Shadcn/UI Komponenten (Card, Button, Input, Badge)
@@ -254,6 +286,7 @@ Um echte Filmdaten zu erhalten:
 ## ⚡ Performance-Optimierungen
 
 ### Parallelisierung der API-Calls
+
 **Problem:** Ursprünglich wurden die 10 Streaming-Provider-Aufrufe sequenziell durchgeführt (~6 Sekunden).
 
 **Lösung:** Verwendung von `asyncio.gather()` für parallele Ausführung.
@@ -269,11 +302,13 @@ streaming_results = await asyncio.gather(*streaming_tasks)  # Alle gleichzeitig!
 ```
 
 ### Ergebnis
+
 - **Vorher:** ~6.0 Sekunden durchschnittliche Response-Zeit
-- **Nachher:** ~2.3 Sekunden durchschnittliche Response-Zeit  
+- **Nachher:** ~2.3 Sekunden durchschnittliche Response-Zeit
 - **Verbesserung:** 61% schneller! ⚡
 
 ### Performance-Breakdown
+
 | Komponente | Zeit |
 |------------|------|
 | KI-Analyse (GPT-4o-mini) | ~1.5s |
@@ -295,6 +330,7 @@ streaming_results = await asyncio.gather(*streaming_tasks)  # Alle gleichzeitig!
 ## 🌟 Zukunftige Erweiterungen
 
 ### Backend
+
 - [ ] Benutzer-Authentifizierung
 - [ ] Favoriten-Liste in MongoDB speichern
 - [ ] Film-Bewertungen
@@ -303,6 +339,7 @@ streaming_results = await asyncio.gather(*streaming_tasks)  # Alle gleichzeitig!
 - [x] **Streaming-Verfügbarkeit** ✅ (Implementiert!)
 
 ### Frontend
+
 - [ ] Film-Detail-Seiten
 - [ ] Trailer-Integration (YouTube)
 - [ ] Benutzer-Profile
@@ -312,11 +349,13 @@ streaming_results = await asyncio.gather(*streaming_tasks)  # Alle gleichzeitig!
 - [x] **Streaming-Badges Anzeige** ✅ (Implementiert!)
 
 ### KI
+
 - [ ] Kontext-Speicherung für Follow-up Fragen
 - [ ] Personalisierte Empfehlungen
 - [ ] Stimmungsanalyse aus Beschreibungen
 
 ### Streaming
+
 - [x] Anzeige von Streaming-Anbietern ✅
 - [ ] Filter nach spezifischen Plattformen
 - [ ] Preisvergleich (Kauf vs. Abo)
@@ -349,7 +388,7 @@ Benutzer: "Spannende Thriller"
 
 ## 📞 Support & Dokumentation
 
-- **TMDb API Docs:** https://developers.themoviedb.org/3
+- **TMDb API Docs:** <https://developers.themoviedb.org/3>
 - **Emergent LLM:** Integriert mit Universal Key
 - **FastAPI Docs:** Automatisch unter `/docs` verfügbar
 
@@ -357,8 +396,8 @@ Benutzer: "Spannende Thriller"
 
 - ✅ Backend läuft auf Port 8001
 - ✅ Frontend läuft auf Port 3000
-- ✅ Live unter: https://film-robo.preview.emergentagent.com
-- ✅ API unter: https://film-robo.preview.emergentagent.com/api
+- ✅ Live unter: <https://film-robo.preview.emergentagent.com>
+- ✅ API unter: <https://film-robo.preview.emergentagent.com/api>
 - ✅ Supervisor überwacht alle Services
 
 ---
