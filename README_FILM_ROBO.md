@@ -281,12 +281,16 @@ streaming_results = await asyncio.gather(*streaming_tasks)  # Alle gleichzeitig!
 | 10x Streaming-Provider (parallel) | ~0.5s |
 | **Gesamt** | **~2.3s** |
 
+## 🔒 Sicherheit & Best Practices
+
 ✅ Environment-Variablen für API-Keys
 ✅ CORS korrekt konfiguriert
 ✅ Error-Handling mit HTTPException
 ✅ Input-Validierung mit Pydantic
 ✅ Async/await für Performance
 ✅ Logging für Debugging
+✅ **Parallele API-Calls mit asyncio.gather()**
+✅ **Timeout-Handling (5s für Streaming, 10s für Filme)**
 
 ## 🌟 Zukunftige Erweiterungen
 
