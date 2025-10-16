@@ -132,24 +132,69 @@ def analyze_prompt_fallback(prompt: str) -> List[int]:
 
     return list(set(found_genres))
 
-# TMDb API-Kommunikation
+# TMDb API-Kommunikation: Streaming-Verfügbarkeit
+async def fetch_streaming_providers(movie_id: int) -> List[StreamingProvider]:
+    """
+    Ruft Streaming-Verfügbarkeit für einen Film ab (für Deutschland).
+    """
+    if TMDB_API_KEY == 'PLACEHOLDER':
+        # Mock-Daten
+        mock_providers = ['Netflix', 'Amazon Prime', 'Disney+', 'Sky']
+        import random
+        selected = random.sample(mock_providers, k=random.randint(1, 3))
+        return [StreamingProvider(provider_name=p, logo_path=None) for p in selected]
+    
+    try:
+        params = {'api_key': TMDB_API_KEY}
+        
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.get(
+                f"{TMDB_BASE_URL}/movie/{movie_id}/watch/providers",
+                params=params
+            )
+            response.raise_for_status()
+            data = response.json()
+        
+        # Deutsche Streaming-Anbieter (DE)
+        providers_data = data.get('results', {}).get('DE', {})
+        
+        # Flatrate = Subscription-Streaming (Netflix, Prime, etc.)
+        flatrate = providers_data.get('flatrate', [])
+        
+        streaming_providers = []
+        for provider in flatrate:
+            streaming_providers.append(StreamingProvider(
+                provider_name=provider.get('provider_name'),
+                logo_path=f"https://image.tmdb.org/t/p/w92{provider.get('logo_path')}" if provider.get('logo_path') else None
+            ))
+        
+        return streaming_providers
+    
+    except Exception as e:
+        logging.warning(f"Streaming-Provider-Fehler für Film {movie_id}: {e}")
+        return []
+
+# TMDb API-Kommunikation: Filme abrufen
 async def fetch_movies_from_tmdb(genre_ids: List[int]) -> List[Movie]:
     """
-    Ruft Filme von der TMDb API ab.
+    Ruft Filme von der TMDb API ab inkl. Streaming-Verfügbarkeit.
     """
     if TMDB_API_KEY == 'PLACEHOLDER':
         # Mock-Daten wenn kein API-Key
         logging.warning("Verwende Mock-Daten. Bitte TMDB_API_KEY setzen.")
-        return [
-            Movie(
+        movies = []
+        for i in range(10):
+            # Mock Streaming-Provider
+            providers = await fetch_streaming_providers(1000 + i)
+            movies.append(Movie(
                 title=f"Simulierter Film {i+1}",
                 release_date="2024-01-01",
                 tmdb_id=1000 + i,
                 overview="Dies ist ein Platzhalter-Film. Fügen Sie einen TMDb API-Schlüssel hinzu für echte Daten.",
-                vote_average=7.5 + (i * 0.1)
-            )
-            for i in range(10)
-        ]
+                vote_average=7.5 + (i * 0.1),
+                streaming_providers=providers
+            ))
+        return movies
     
     # Echte TMDb API-Anfrage
     try:
@@ -162,7 +207,7 @@ async def fetch_movies_from_tmdb(genre_ids: List[int]) -> List[Movie]:
             'page': 1
         }
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(f"{TMDB_BASE_URL}/discover/movie", params=params)
             response.raise_for_status()
             data = response.json()
@@ -170,13 +215,19 @@ async def fetch_movies_from_tmdb(genre_ids: List[int]) -> List[Movie]:
         movies = []
         for result in data.get('results', [])[:10]:
             poster_path = result.get('poster_path')
+            movie_id = result.get('id')
+            
+            # Streaming-Provider für jeden Film abrufen
+            streaming_providers = await fetch_streaming_providers(movie_id)
+            
             movies.append(Movie(
                 title=result.get('title'),
                 release_date=result.get('release_date'),
-                tmdb_id=result.get('id'),
+                tmdb_id=movie_id,
                 poster_url=f"https://image.tmdb.org/t/p/w500{poster_path}" if poster_path else None,
                 overview=result.get('overview'),
-                vote_average=result.get('vote_average')
+                vote_average=result.get('vote_average'),
+                streaming_providers=streaming_providers
             ))
         
         return movies
