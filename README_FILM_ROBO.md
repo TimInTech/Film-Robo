@@ -267,6 +267,7 @@ Um echte Filmdaten zu erhalten:
 - [ ] Film-Bewertungen
 - [ ] Erweiterte Filter (Jahr, Bewertung, etc.)
 - [ ] Caching für häufige Anfragen
+- [x] **Streaming-Verfügbarkeit** ✅ (Implementiert!)
 
 ### Frontend
 - [ ] Film-Detail-Seiten
@@ -275,11 +276,18 @@ Um echte Filmdaten zu erhalten:
 - [ ] Watch-Later Liste
 - [ ] Dark Mode Toggle
 - [ ] Mehrsprachigkeit (EN/DE)
+- [x] **Streaming-Badges Anzeige** ✅ (Implementiert!)
 
 ### KI
 - [ ] Kontext-Speicherung für Follow-up Fragen
 - [ ] Personalisierte Empfehlungen
 - [ ] Stimmungsanalyse aus Beschreibungen
+
+### Streaming
+- [x] Anzeige von Streaming-Anbietern ✅
+- [ ] Filter nach spezifischen Plattformen
+- [ ] Preisvergleich (Kauf vs. Abo)
+- [ ] Benachrichtigungen bei neuer Verfügbarkeit
 
 ## 📝 Anwendungsbeispiele
 
