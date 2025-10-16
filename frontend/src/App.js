@@ -162,10 +162,31 @@ function App() {
                     )}
                   </CardHeader>
                   {movie.overview && (
-                    <CardContent className="pt-0 p-4">
+                    <CardContent className="pt-0 p-4 pb-2">
                       <p className="text-sm text-gray-600 line-clamp-3">
                         {movie.overview}
                       </p>
+                    </CardContent>
+                  )}
+                  {/* Streaming-Anbieter */}
+                  {movie.streaming_providers && movie.streaming_providers.length > 0 && (
+                    <CardContent className="pt-2 p-4">
+                      <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                        <Tv className="w-4 h-4" />
+                        <span className="font-medium">Verfügbar auf:</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {movie.streaming_providers.map((provider, idx) => (
+                          <Badge 
+                            key={idx}
+                            variant="secondary" 
+                            className="text-xs bg-purple-100 text-purple-700 hover:bg-purple-200"
+                            data-testid={`streaming-badge-${index}-${idx}`}
+                          >
+                            {provider.provider_name}
+                          </Badge>
+                        ))}
+                      </div>
                     </CardContent>
                   )}
                 </Card>
