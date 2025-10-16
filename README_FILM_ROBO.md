@@ -189,6 +189,7 @@ Um echte Filmdaten zu erhalten:
 ✅ Toast-Notifications
 ✅ Loading-States
 ✅ Responsive Design
+✅ **Streaming-Verfügbarkeit-Anzeige** (21+ Badges erfolgreich angezeigt)
 
 ### Test-Ergebnisse:
 ```
@@ -198,6 +199,7 @@ Um echte Filmdaten zu erhalten:
 ✓ "Action mit Explosionen" → Genre [28] ✓
 ✓ "Fantasy Zauber Filme" → Genre [14] ✓
 ✓ "romantische Komödie" → Genre [35, 10749] ✓
+✓ Streaming-Badges: Netflix, Amazon Prime, Disney+, Sky ✓
 ```
 
 ## 📁 Projektstruktur
