@@ -45,6 +45,11 @@ class PromptRequest(BaseModel):
     """Modell für die Eingabe des Benutzers"""
     prompt: str = Field(..., example="Zeig mir lustige Filme")
 
+class StreamingProvider(BaseModel):
+    """Modell für einen Streaming-Anbieter"""
+    provider_name: str
+    logo_path: Optional[str] = None
+
 class Movie(BaseModel):
     """Modell für einen Film"""
     title: str
@@ -53,6 +58,7 @@ class Movie(BaseModel):
     poster_url: Optional[str] = None
     overview: Optional[str] = None
     vote_average: Optional[float] = None
+    streaming_providers: List[StreamingProvider] = []
 
 class RecommendationResponse(BaseModel):
     """Modell für die API-Antwort"""
