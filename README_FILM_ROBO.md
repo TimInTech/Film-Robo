@@ -85,7 +85,7 @@ Film Robo ist eine moderne Webanwendung, die natürlichsprachige Benutzer-Prompt
 ## 📡 API-Endpunkte
 
 ### POST /api/recommend
-Analysiert den Prompt und gibt Filmempfehlungen zurück.
+Analysiert den Prompt und gibt Filmempfehlungen zurück **inkl. Streaming-Verfügbarkeit**.
 
 **Request:**
 ```json
@@ -106,7 +106,17 @@ Analysiert den Prompt und gibt Filmempfehlungen zurück.
       "tmdb_id": 1000,
       "poster_url": null,
       "overview": "Dies ist ein Platzhalter-Film...",
-      "vote_average": 7.5
+      "vote_average": 7.5,
+      "streaming_providers": [
+        {
+          "provider_name": "Netflix",
+          "logo_path": "https://image.tmdb.org/t/p/w92/..."
+        },
+        {
+          "provider_name": "Amazon Prime",
+          "logo_path": "https://image.tmdb.org/t/p/w92/..."
+        }
+      ]
     }
   ],
   "used_ai": true
