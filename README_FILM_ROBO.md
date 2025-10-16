@@ -143,6 +143,7 @@ Health-Check Endpunkt.
 - **Hover-Effekte:** Smooth Transformationen auf Filmkarten
 - **Toast-Notifications:** Echtzeit-Feedback für Benutzer
 - **Loading-States:** Spinner während der Suche
+- **✨ NEU: Streaming-Badges:** Sichtbare Anzeige verfügbarer Plattformen mit TV-Icon
 
 ## 🔧 TMDb API Integration
 
