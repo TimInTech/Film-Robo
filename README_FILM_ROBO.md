@@ -40,6 +40,7 @@ Film Robo ist eine moderne Webanwendung, die natürlichsprachige Benutzer-Prompt
 ### 3. Filmempfehlungen
 - Top 10 Filme basierend auf Genre-Zuordnung
 - Anzeige von Poster, Titel, Jahr, Bewertung
+- **✨ NEU: Streaming-Verfügbarkeit** (Netflix, Amazon Prime, Disney+, Sky, etc.)
 - Sortierung nach Popularität
 
 ## 🚀 Installation & Setup
