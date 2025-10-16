@@ -1,0 +1,29 @@
+name: Smoke
+on: [pull_request]
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: |
+          cd backend
+          python -m venv .venv
+          . .venv/bin/activate
+          pip install -r requirements.txt
+          python - <<'PY'
+          print("OK: deps installed")
+          PY
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - run: |
+          cd frontend
+          corepack enable
+          corepack prepare yarn@stable --activate
+          yarn --frozen-lockfile || yarn
+          echo "OK: deps installed"
