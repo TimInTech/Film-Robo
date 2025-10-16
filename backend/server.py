@@ -174,26 +174,37 @@ async def fetch_streaming_providers(movie_id: int) -> List[StreamingProvider]:
         logging.warning(f"Streaming-Provider-Fehler für Film {movie_id}: {e}")
         return []
 
-# TMDb API-Kommunikation: Filme abrufen
+# TMDb API-Kommunikation: Filme abrufen mit PARALLELER Streaming-Verfügbarkeit
 async def fetch_movies_from_tmdb(genre_ids: List[int]) -> List[Movie]:
     """
     Ruft Filme von der TMDb API ab inkl. Streaming-Verfügbarkeit.
+    OPTIMIERT: Streaming-Provider werden parallel abgerufen (asyncio.gather).
     """
     if TMDB_API_KEY == 'PLACEHOLDER':
         # Mock-Daten wenn kein API-Key
         logging.warning("Verwende Mock-Daten. Bitte TMDB_API_KEY setzen.")
-        movies = []
+        
+        # Erstelle Mock-Filme
+        mock_movies = []
         for i in range(10):
-            # Mock Streaming-Provider
-            providers = await fetch_streaming_providers(1000 + i)
-            movies.append(Movie(
-                title=f"Simulierter Film {i+1}",
-                release_date="2024-01-01",
-                tmdb_id=1000 + i,
-                overview="Dies ist ein Platzhalter-Film. Fügen Sie einen TMDb API-Schlüssel hinzu für echte Daten.",
-                vote_average=7.5 + (i * 0.1),
-                streaming_providers=providers
-            ))
+            mock_movies.append({
+                'title': f"Simulierter Film {i+1}",
+                'release_date': "2024-01-01",
+                'tmdb_id': 1000 + i,
+                'overview': "Dies ist ein Platzhalter-Film. Fügen Sie einen TMDb API-Schlüssel hinzu für echte Daten.",
+                'vote_average': 7.5 + (i * 0.1)
+            })
+        
+        # PARALLEL: Alle Streaming-Provider auf einmal abrufen
+        import asyncio
+        streaming_tasks = [fetch_streaming_providers(movie['tmdb_id']) for movie in mock_movies]
+        streaming_results = await asyncio.gather(*streaming_tasks)
+        
+        # Movies mit Streaming-Daten zusammenführen
+        movies = []
+        for movie_data, providers in zip(mock_movies, streaming_results):
+            movies.append(Movie(**movie_data, streaming_providers=providers))
+        
         return movies
     
     # Echte TMDb API-Anfrage
@@ -212,18 +223,22 @@ async def fetch_movies_from_tmdb(genre_ids: List[int]) -> List[Movie]:
             response.raise_for_status()
             data = response.json()
         
+        # Filme vorbereiten
+        movie_results = data.get('results', [])[:10]
+        
+        # PARALLEL: Alle Streaming-Provider für alle Filme gleichzeitig abrufen
+        import asyncio
+        streaming_tasks = [fetch_streaming_providers(result.get('id')) for result in movie_results]
+        streaming_results = await asyncio.gather(*streaming_tasks)
+        
+        # Movies mit allen Daten zusammenbauen
         movies = []
-        for result in data.get('results', [])[:10]:
+        for result, streaming_providers in zip(movie_results, streaming_results):
             poster_path = result.get('poster_path')
-            movie_id = result.get('id')
-            
-            # Streaming-Provider für jeden Film abrufen
-            streaming_providers = await fetch_streaming_providers(movie_id)
-            
             movies.append(Movie(
                 title=result.get('title'),
                 release_date=result.get('release_date'),
-                tmdb_id=movie_id,
+                tmdb_id=result.get('id'),
                 poster_url=f"https://image.tmdb.org/t/p/w500{poster_path}" if poster_path else None,
                 overview=result.get('overview'),
                 vote_average=result.get('vote_average'),
