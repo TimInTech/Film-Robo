@@ -147,6 +147,18 @@ Health-Check Endpunkt.
 
 ## 🔧 TMDb API Integration
 
+### Was wird von TMDb genutzt?
+
+1. **Film-Discovery** (`/discover/movie`)
+   - Filtern nach Genres
+   - Sortierung nach Popularität
+   - Deutsche Sprache/Titel
+
+2. **✨ Streaming-Verfügbarkeit** (`/movie/{id}/watch/providers`)
+   - Zeigt verfügbare Streaming-Plattformen (für Deutschland)
+   - Inkl. Netflix, Amazon Prime, Disney+, Sky, etc.
+   - Flatrate (Abo) und Kaufoptionen
+
 ### API-Key hinzufügen
 
 Um echte Filmdaten zu erhalten:
