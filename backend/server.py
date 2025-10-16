@@ -10,7 +10,11 @@ from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
 import httpx
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+from typing import Tuple
+try:
+    from openai import AsyncOpenAI  # type: ignore
+except Exception:
+    AsyncOpenAI = None  # Optional dependency
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -27,7 +31,7 @@ app = FastAPI(title="Film Robo Backend")
 api_router = APIRouter(prefix="/api")
 
 # Environment variables
-EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
 TMDB_API_KEY = os.environ.get('TMDB_API_KEY', 'PLACEHOLDER')
 TMDB_BASE_URL = "https://api.themoviedb.org/3"
 
@@ -73,42 +77,34 @@ async def analyze_prompt_with_ai(prompt: str) -> List[int]:
     Verwendet KI (Emergent LLM) um den Prompt zu analysieren und Genre-IDs zurückzugeben.
     """
     try:
-        chat = LlmChat(
-            api_key=EMERGENT_LLM_KEY,
-            session_id=f"film-robo-{uuid.uuid4()}",
-            system_message="""Du bist ein Filmexperte, der Benutzer-Wünsche analysiert.
-            
-Deine Aufgabe: Analysiere den Benutzer-Prompt und ordne ihn den passenden Film-Genres zu.
-            
-Verfügbare Genre-Kategorien:
-            - Komödie: Lustige Filme, romantische Komödien, Humor (Genre-IDs: 35, 10749)
-            - Horror/Thriller: Gruselige, spannende, angsteinflößende Filme (Genre-IDs: 27, 53)
-            - Kinderfilme: Familienfilme, Animationsfilme für Kinder (Genre-IDs: 10751, 16)
-            - Action/Abenteuer: Action, Kampf, Abenteuer, Reisen (Genre-IDs: 28, 12)
-            - Sci-Fi/Fantasy: Science Fiction, Weltraum, Fantasy, Zauber (Genre-IDs: 878, 14)
-            
-Antworte NUR mit einer kommagetrennten Liste der passenden Genre-IDs.
-            Beispiel: Wenn der Benutzer nach lustigen Alien-Filmen fragt, antworte: 35,878
-            Antworte NICHTS anderes, nur die Zahlen!"""
-        ).with_model("openai", "gpt-4o-mini")
-        
-        user_message = UserMessage(text=f"Analysiere diesen Film-Wunsch: '{prompt}'")
-        response = await chat.send_message(user_message)
-        
-        # Parse die Genre-IDs aus der Antwort
-        genre_ids = []
-        for part in response.split(','):
+        if not OPENAI_API_KEY or AsyncOpenAI is None:
+            raise RuntimeError("OpenAI nicht konfiguriert")
+        client = AsyncOpenAI(api_key=OPENAI_API_KEY)
+        system = (
+            "Du bist ein Filmexperte. Analysiere den Benutzer-Prompt und gib NUR eine kommagetrennte Liste "
+            "von passenden TMDb Genre-IDs zurück. Kategorien: "
+            "Komödie(35,10749), Horror/Thriller(27,53), Kinderfilme(10751,16), Action/Abenteuer(28,12), Sci-Fi/Fantasy(878,14). "
+            "Beispiel: lustige Alien-Filme → 35,878. Keine weiteren Wörter."
+        )
+        msg_user = f"Analysiere diesen Film-Wunsch: '{prompt}'"
+        chat = await client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": msg_user},
+            ],
+            temperature=0,
+        )
+        content = chat.choices[0].message.content if chat.choices else ""
+        genre_ids: List[int] = []
+        for part in (content or "").split(','):
             try:
-                genre_id = int(part.strip())
-                genre_ids.append(genre_id)
-            except ValueError:
+                genre_ids.append(int(part.strip()))
+            except Exception:
                 continue
-        
         return list(set(genre_ids))
-    
     except Exception as e:
-        logging.error(f"KI-Analyse fehlgeschlagen: {e}")
-        # Fallback auf Keyword-Analyse
+        logging.warning(f"KI-Analyse nicht verfügbar, nutze Fallback: {e}")
         return analyze_prompt_fallback(prompt)
 
 # Fallback Keyword-Analyse
@@ -143,10 +139,10 @@ async def fetch_streaming_providers(movie_id: int) -> List[StreamingProvider]:
         import random
         selected = random.sample(mock_providers, k=random.randint(1, 3))
         return [StreamingProvider(provider_name=p, logo_path=None) for p in selected]
-    
+
     try:
         params = {'api_key': TMDB_API_KEY}
-        
+
         async with httpx.AsyncClient(timeout=5.0) as client:
             response = await client.get(
                 f"{TMDB_BASE_URL}/movie/{movie_id}/watch/providers",
@@ -154,22 +150,22 @@ async def fetch_streaming_providers(movie_id: int) -> List[StreamingProvider]:
             )
             response.raise_for_status()
             data = response.json()
-        
+
         # Deutsche Streaming-Anbieter (DE)
         providers_data = data.get('results', {}).get('DE', {})
-        
+
         # Flatrate = Subscription-Streaming (Netflix, Prime, etc.)
         flatrate = providers_data.get('flatrate', [])
-        
+
         streaming_providers = []
         for provider in flatrate:
             streaming_providers.append(StreamingProvider(
                 provider_name=provider.get('provider_name'),
                 logo_path=f"https://image.tmdb.org/t/p/w92{provider.get('logo_path')}" if provider.get('logo_path') else None
             ))
-        
+
         return streaming_providers
-    
+
     except Exception as e:
         logging.warning(f"Streaming-Provider-Fehler für Film {movie_id}: {e}")
         return []
@@ -183,7 +179,7 @@ async def fetch_movies_from_tmdb(genre_ids: List[int]) -> List[Movie]:
     if TMDB_API_KEY == 'PLACEHOLDER':
         # Mock-Daten wenn kein API-Key
         logging.warning("Verwende Mock-Daten. Bitte TMDB_API_KEY setzen.")
-        
+
         # Erstelle Mock-Filme
         mock_movies = []
         for i in range(10):
@@ -194,19 +190,19 @@ async def fetch_movies_from_tmdb(genre_ids: List[int]) -> List[Movie]:
                 'overview': "Dies ist ein Platzhalter-Film. Fügen Sie einen TMDb API-Schlüssel hinzu für echte Daten.",
                 'vote_average': 7.5 + (i * 0.1)
             })
-        
+
         # PARALLEL: Alle Streaming-Provider auf einmal abrufen
         import asyncio
         streaming_tasks = [fetch_streaming_providers(movie['tmdb_id']) for movie in mock_movies]
         streaming_results = await asyncio.gather(*streaming_tasks)
-        
+
         # Movies mit Streaming-Daten zusammenführen
         movies = []
         for movie_data, providers in zip(mock_movies, streaming_results):
             movies.append(Movie(**movie_data, streaming_providers=providers))
-        
+
         return movies
-    
+
     # Echte TMDb API-Anfrage
     try:
         genres_string = ','.join(map(str, genre_ids))
@@ -217,20 +213,20 @@ async def fetch_movies_from_tmdb(genre_ids: List[int]) -> List[Movie]:
             'language': 'de-DE',
             'page': 1
         }
-        
+
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(f"{TMDB_BASE_URL}/discover/movie", params=params)
             response.raise_for_status()
             data = response.json()
-        
+
         # Filme vorbereiten
         movie_results = data.get('results', [])[:10]
-        
+
         # PARALLEL: Alle Streaming-Provider für alle Filme gleichzeitig abrufen
         import asyncio
         streaming_tasks = [fetch_streaming_providers(result.get('id')) for result in movie_results]
         streaming_results = await asyncio.gather(*streaming_tasks)
-        
+
         # Movies mit allen Daten zusammenbauen
         movies = []
         for result, streaming_providers in zip(movie_results, streaming_results):
@@ -244,9 +240,9 @@ async def fetch_movies_from_tmdb(genre_ids: List[int]) -> List[Movie]:
                 vote_average=result.get('vote_average'),
                 streaming_providers=streaming_providers
             ))
-        
+
         return movies
-    
+
     except Exception as e:
         logging.error(f"TMDb API-Fehler: {e}")
         raise HTTPException(status_code=500, detail="Fehler bei der TMDb API-Kommunikation")
@@ -258,11 +254,11 @@ async def get_recommendations(request: PromptRequest):
     Verarbeitet den Benutzer-Prompt und gibt Filmempfehlungen zurück.
     """
     logging.info(f"Empfangen: {request.prompt}")
-    
+
     # KI-basierte Analyse
     genre_ids = await analyze_prompt_with_ai(request.prompt)
     used_ai = True
-    
+
     if not genre_ids:
         return RecommendationResponse(
             message="Konnte keine passenden Genres finden. Versuchen Sie es mit: lustig, spannend, Kinder, Action oder Fantasy.",
@@ -270,10 +266,10 @@ async def get_recommendations(request: PromptRequest):
             movies=[],
             used_ai=used_ai
         )
-    
+
     # Filme von TMDb abrufen
     movies = await fetch_movies_from_tmdb(genre_ids)
-    
+
     return RecommendationResponse(
         message=f"✓ {len(movies)} Filme gefunden für Ihre Anfrage!",
         requested_genre_ids=genre_ids,
