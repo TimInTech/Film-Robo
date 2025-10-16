@@ -308,10 +308,11 @@ Benutzer: "Spannende Thriller"
 
 ## 🐛 Bekannte Limitierungen
 
-1. **Mock-Daten:** Ohne TMDb API-Key werden Platzhalter verwendet
+1. **Mock-Daten:** Ohne TMDb API-Key werden Platzhalter verwendet (inkl. randomisierte Streaming-Anbieter)
 2. **Genre-Limitierung:** Nur 5 Hauptkategorien
 3. **Keine Persistenz:** Suchergebnisse werden nicht gespeichert
 4. **Single-Page:** Keine Routing/Navigation
+5. **Streaming-Daten:** Nur für Deutschland (DE) - kann für andere Länder erweitert werden
 
 ## 📞 Support & Dokumentation
 
