@@ -235,12 +235,20 @@ Um echte Filmdaten zu erhalten:
 - Top 10 populäre Filme
 - Vollständige Metadaten (Poster, Bewertung, etc.)
 
-### 3. React Frontend
+### 3. **✨ Streaming-Verfügbarkeit** (`fetch_streaming_providers`)
+- Separate API-Aufrufe für jeden Film
+- Abruf der Verfügbarkeit für Deutschland (DE)
+- Zeigt Flatrate-Anbieter (Abo-Streaming)
+- Timeout-Handling für Performance
+- Mock-Daten bei fehlendem API-Key
+
+### 4. React Frontend
 - State Management mit useState
 - Axios für API-Calls
 - Shadcn/UI Komponenten (Card, Button, Input, Badge)
 - Sonner für Toast-Notifications
-- Lucide Icons
+- Lucide Icons (Film, Star, **TV**)
+- Streaming-Badges in Lila-Theme
 
 ## 🔒 Sicherheit & Best Practices
 
